@@ -56,9 +56,9 @@ public class LZW {
 
         }
 
-        System.out.println("Indices");
-        System.out.println(saida);
-        System.out.println("Dicionário tem " + dicionario.size() + " elementos");
+      //  System.out.println("Indices");
+       // System.out.println(saida);
+       // System.out.println("Dicionário tem " + dicionario.size() + " elementos");
 
         BitSequence bs = new BitSequence(BITS_POR_INDICE);
         for (i = 0; i < saida.size(); i++) {
