@@ -8,6 +8,7 @@ public class Principal {
         File f = new File("dados/livros.db");
         f.delete();
         ArquivoLivro arqTeste;
+        ArquivoLivro arqTeste2;
         Livro l1 = new Livro(-1, "9788563560278", "Bleach CFYW", 15.99F);
         Livro l2 = new Livro(-1, "9788584290482", "Ensino Híbrido", 39.90F);
         Livro l3 = new Livro(-1, "9786559790005", "Bleach vol 14", 48.1F);
@@ -20,6 +21,7 @@ public class Principal {
 
         try {
             arqTeste = new ArquivoLivro("dados/livros.db");
+            arqTeste2 = new ArquivoLivro("dados/backas.db");
 
             id1 = arqTeste.createLivro(l1);
             MyIO.println("Livro criado com o ID: " + id1);
@@ -36,57 +38,41 @@ public class Principal {
             id5 = arqTeste.createLivro(l5);
             MyIO.println("Livro criado com o ID: " + id5);
 
-            if (arqTeste.deleteLivro(id2))
-                MyIO.println("Livro de ID " + id2 + " excluído!");
-            else
-                MyIO.println("Livro de ID " + id2 + " não encontrado!");
-
             l4.setTitulo("A Memoria");
             if (arqTeste.updateLivro(l4))
                 MyIO.println("Livro de ID " + l4.getID() + " alterado!");
             else
                 MyIO.println("Livro de ID " + l4.getID() + " não encontrado!");
 
-            /*
-             * if (arqTeste.deleteLivro(id7))
-             * MyIO.println("Livro de ID " + id7 + " excluído!");
-             * else
-             * MyIO.println("Livro de ID " + id7 + " não encontrado!");
-             */
-
             id3 = arqTeste.createLivro(l3);
             MyIO.println("Livro criado com o ID: " + id3);
 
-            /*
-             * l4.setTitulo("A Memoria 2");
-             * if (arqTeste.update(l4))
-             * MyIO.println("Livro de ID " + l4.getID() + " alterado!");
-             * else
-             * MyIO.println("Livro de ID " + l4.getID() + " não encontrado!");
-             */
             id6 = arqTeste.createLivro(l6);
 
             MyIO.println("Livro criado com o ID: " + id6);
 
             livre = arqTeste.read(id7);
             MyIO.println(livre.toString());
-            /*
-             * livre = arqTeste.read(id3);
-             * MyIO.println(livre.toString());
-             * 
-             * livre = arqTeste.read(id4);
-             * MyIO.println(livre.toString());
-             * 
-             * livre = arqTeste.read(id5);
-             * MyIO.println(livre.toString());
-             * 
-             * livre = arqTeste.read(id6);
-             * MyIO.println(livre.toString());
-             */
+            
+            String ende = arqTeste.comprime();
 
+            arqTeste2.descomprime(ende);
 
+            livre = arqTeste2.read(id1);
+            MyIO.println(livre.toString());
+            livre = arqTeste2.read(id2);
+            MyIO.println(livre.toString());
+            livre = arqTeste2.read(id3);
+            MyIO.println(livre.toString());
+            livre = arqTeste2.read(id4);
+            MyIO.println(livre.toString());
+            livre = arqTeste2.read(id5);
+            MyIO.println(livre.toString());
+            livre = arqTeste2.read(id6);
+            MyIO.println(livre.toString());
 
             arqTeste.close();
+            arqTeste2.close();
 
         } catch (Exception e) {
             e.printStackTrace();
