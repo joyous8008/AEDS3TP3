@@ -50,6 +50,14 @@ public class Livro implements Registro {
     return titulo;
   }
 
+  public void setPreco(float preco) {
+    this.preco = preco;
+  }
+
+  public float getPreco() {
+    return preco;
+  }
+
   public byte[] toByteArray() throws Exception {
     ByteArrayOutputStream ba_out = new ByteArrayOutputStream();
     DataOutputStream dos = new DataOutputStream(ba_out);

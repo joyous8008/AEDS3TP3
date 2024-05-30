@@ -1,78 +1,174 @@
 import java.io.File;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
 
 //Código usado para teste
 //Deve ser ignorado ou iniciado a partir da pasta TP2
 public class Principal {
+
+    // Pega o nome do backup mais recente (é o primeiro)
+    private static String bpRecente() {
+        RandomAccessFile bplist;
+        String na = "";
+        try {
+            bplist = new RandomAccessFile("backups/bp_list.bd", "rw");
+            na = bplist.readUTF();
+            bplist.close();
+        } catch (Exception e) {
+            MyIO.println("" + e);
+        }
+        return na;
+    }
+
+    // Pega o nome de todos os backups (menos o primeiro)
+    private static String[] listabp() {
+        RandomAccessFile bplist;
+        ArrayList<String> lista = new ArrayList<>();
+        String[] resp;
+        try {
+            bplist = new RandomAccessFile("backups/bp_list.bd", "rw");
+            bplist.readUTF();
+            while (bplist.getFilePointer() < bplist.length()) {
+                lista.add(bplist.readUTF());
+            }
+            bplist.close();
+        } catch (Exception e) {
+            MyIO.println("" + e);
+        }
+        resp = new String[lista.size()];
+        for (String s : lista) {
+            resp[lista.indexOf(s)] = s;
+        }
+        return resp;
+    }
+
+    //Mostra todos os backups e retorna o escolhido
+    private static String escolherbp() {
+        String resp = "";
+        int escolha = 0;
+        String[] lista = listabp();
+
+        MyIO.println("----------------------------------------------");
+        int i = 0;
+
+        for (String s : lista) {
+            MyIO.println(i + 1 + " - " + s);
+            i++;
+        }
+
+        MyIO.readInt("Escolha o numero do backup: ");
+        MyIO.println("----------------------------------------------");
+        resp = lista[escolha - 1];
+
+        return resp;
+    }
+
+    //Pequeno método para a criação de novo livro
+    private static Livro criarLivro() {
+        Livro novo = new Livro();
+        String leitura = "";
+        float preco = 0;
+
+        MyIO.println("----------------------------------------------");
+        leitura = MyIO.readLine("Digite o titulo: ");
+        novo.setTitulo(leitura);
+        leitura = MyIO.readLine("Digite o ISBN: ");
+        novo.setIsbn(leitura);
+        preco = MyIO.readFloat("Digite o preço: ");
+        novo.setPreco(preco);
+        MyIO.println("----------------------------------------------");
+
+        return novo;
+    }
+
+    //Pequeno método para a atualização de livro
+    private static Livro atualizarLivro(Livro atual) {
+        String leitura = "";
+        float preco = 0;
+        MyIO.println("----------------------------------------------");
+        leitura = MyIO.readLine("Digite o titulo: ");
+        atual.setTitulo(leitura);
+        leitura = MyIO.readLine("Digite o ISBN: ");
+        atual.setIsbn(leitura);
+        preco = MyIO.readFloat("Digite o preço: ");
+        atual.setPreco(preco);
+        MyIO.println("----------------------------------------------");
+
+        return atual;
+    }
+
     public static void main(String[] args) {
 
         File f = new File("dados/livros.db");
         f.delete();
         ArquivoLivro arqTeste;
-        ArquivoLivro arqTeste2;
-        Livro l1 = new Livro(-1, "9788563560278", "Bleach CFYW", 15.99F);
-        Livro l2 = new Livro(-1, "9788584290482", "Ensino Híbrido", 39.90F);
-        Livro l3 = new Livro(-1, "9786559790005", "Bleach vol 14", 48.1F);
-        Livro l4 = new Livro(-1, "9788582714911", "Memoria", 55.58F);
-        Livro l5 = new Livro(-1, "9786587150062", "Memoria moderno", 48.9F);
-        Livro l6 = new Livro(-1, "9786587150063", "Bleach vol1", 65.0F);
-        Livro l7 = new Livro(-1, "9786587150063", "Bleach Thousand Year Blood War", 65.0F);
-        Livro livre;
-        int id1, id2, id3, id4, id5, id6, id7;
-
+        Livro criar;
+        boolean saida = false;
+        byte opcao = 0;
+        int alvo = -1;
         try {
             arqTeste = new ArquivoLivro("dados/livros.db");
-            arqTeste2 = new ArquivoLivro("dados/backas.db");
 
-            id1 = arqTeste.createLivro(l1);
-            MyIO.println("Livro criado com o ID: " + id1);
+            //Menu de opções
+            MyIO.println("================================================");
+            MyIO.println("0 - Inserir");
+            MyIO.println("1 - Deletar");
+            MyIO.println("2 - Atualizar");
+            MyIO.println("3 - Ler");
+            MyIO.println("4 - Comprimir BD");
+            MyIO.println("5 - Restaurar mais recente");
+            MyIO.println("6 - Escolher backup");
+            MyIO.println("7 - Sair");
+            MyIO.println("================================================");
 
-            id2 = arqTeste.createLivro(l2);
-            MyIO.println("Livro criado com o ID: " + id2);
-
-            id7 = arqTeste.createLivro(l7);
-            MyIO.println("Livro criado com o ID: " + id7);
-
-            id4 = arqTeste.createLivro(l4);
-            MyIO.println("Livro criado com o ID: " + id4);
-
-            id5 = arqTeste.createLivro(l5);
-            MyIO.println("Livro criado com o ID: " + id5);
-
-            l4.setTitulo("A Memoria");
-            if (arqTeste.updateLivro(l4))
-                MyIO.println("Livro de ID " + l4.getID() + " alterado!");
-            else
-                MyIO.println("Livro de ID " + l4.getID() + " não encontrado!");
-
-            id3 = arqTeste.createLivro(l3);
-            MyIO.println("Livro criado com o ID: " + id3);
-
-            id6 = arqTeste.createLivro(l6);
-
-            MyIO.println("Livro criado com o ID: " + id6);
-
-            livre = arqTeste.read(id7);
-            MyIO.println(livre.toString());
-            
-            String ende = arqTeste.comprime();
-
-            arqTeste2.descomprime(ende);
-
-            livre = arqTeste2.read(id1);
-            MyIO.println(livre.toString());
-            livre = arqTeste2.read(id2);
-            MyIO.println(livre.toString());
-            livre = arqTeste2.read(id3);
-            MyIO.println(livre.toString());
-            livre = arqTeste2.read(id4);
-            MyIO.println(livre.toString());
-            livre = arqTeste2.read(id5);
-            MyIO.println(livre.toString());
-            livre = arqTeste2.read(id6);
-            MyIO.println(livre.toString());
-
-            arqTeste.close();
-            arqTeste2.close();
+            //Switch case para todas as diferentes opções do menu
+            while (!saida) {
+                switch (opcao) {
+                    case 0: //Criar livro
+                        criar = criarLivro();
+                        arqTeste.create(criar);
+                        break;
+                    case 1: //Deletar livro
+                        alvo = MyIO.readInt("Escolha quem deletar: ");
+                        if (arqTeste.delete(alvo)) {
+                            MyIO.println("Livro " + alvo + "deletado com sucesso!");
+                        } else
+                            MyIO.println("Erro ao deletar");
+                        break;
+                    case 2: //Atualizar livro
+                        alvo = MyIO.readInt("Escolha quem atualizar: ");
+                        criar = arqTeste.read(alvo);
+                        criar = atualizarLivro(criar);
+                        if (arqTeste.update(criar)) {
+                            MyIO.println("Livro " + alvo + "atualizado com sucesso");
+                        } else
+                            MyIO.println("Erro ao atualizar");
+                        break;
+                    case 3: //Ler livro
+                        alvo = MyIO.readInt("Escolha quem ler: ");
+                        criar = arqTeste.read(alvo);
+                        MyIO.println(criar.toString());
+                        break;
+                    case 4: //Comprimir arquivo
+                        MyIO.println("Comprimindo arquivo");
+                        arqTeste.comprime();
+                        break;
+                    case 5: //Restaurar backup mais recente
+                        MyIO.println("Restaurando backup mais recente");
+                        arqTeste = new ArquivoLivro("dados/livros.db");
+                        arqTeste.descomprime(bpRecente());
+                        break;
+                    case 6: //Restaurar backup escolhido
+                        arqTeste.descomprime(escolherbp());
+                        break;
+                    case 7: //Sair
+                        saida = true;
+                        break;
+                    default: //Saida alternativa
+                        saida = true;
+                        break;
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

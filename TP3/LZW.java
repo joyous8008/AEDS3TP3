@@ -8,9 +8,6 @@ public class LZW {
 
     public static final int BITS_POR_INDICE = 12;
 
-    public LZW() {
-    }
-
     public static byte[] codifica(byte[] msgBytes) throws Exception {
 
         ArrayList<ArrayList<Byte>> dicionario = new ArrayList<>(); // dicionario

@@ -4,9 +4,15 @@ import java.util.Calendar;
 
 //Classe extendida do Arquivo genérico
 public class ArquivoLivro extends Arquivo<Livro> {
+    RandomAccessFile bplist;
 
     ArquivoLivro(String na) throws Exception {
         super(na, Livro.class.getConstructor());
+        try {
+            bplist = new RandomAccessFile("backups/bp_list.bd", "rw");
+        } catch (Exception e) {
+            MyIO.println("" + e);
+        }
     }
 
     public int createLivro(Livro novo) {
@@ -55,8 +61,12 @@ public class ArquivoLivro extends Arquivo<Livro> {
         try {
 
             // Primeiro pega a data e hora atuais
-           timeStamp  = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+            timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
             timeStamp += ".bd";
+            //Insere o nome do backup no começo e no fim do arquivo para recuperação rápida
+            bplist.writeUTF(timeStamp);
+            bplist.seek(bplist.length());
+            bplist.writeUTF(timeStamp);
             // Cria o arquivo de backupnull
             RandomAccessFile backup = new RandomAccessFile("backups/" + timeStamp, "rw");
             byte[] conteudo = new byte[(int) (arquivo.length() - TAM_CABECALHO)];
@@ -79,28 +89,28 @@ public class ArquivoLivro extends Arquivo<Livro> {
     }
 
     public void descomprime(String backup) {
-        //Primeiro cria o acesso do backup
+        // Primeiro cria o acesso do backup
         RandomAccessFile ler_bp;
-        //Depois o array para o resultado descompactado e o conteudo do arquivo
+        // Depois o array para o resultado descompactado e o conteudo do arquivo
         byte[] result = new byte[1];
         byte[] bp;
         try {
-            //Lê o arquivo de backup
-            ler_bp = new RandomAccessFile("backups/" + backup , "rw");
-            bp = new byte[(int)ler_bp.length()];
+            // Lê o arquivo de backup
+            ler_bp = new RandomAccessFile("backups/" + backup, "rw");
+            bp = new byte[(int) ler_bp.length()];
             ler_bp.readFully(bp);
-            //Decodifica e pega o resultado
+            // Decodifica e pega o resultado
             result = LZW.decodifica(bp);
             ler_bp.close();
 
-            //Escreve o backup sobre o arquivo atual (preferencialmente vazio)
+            // Escreve o backup sobre o arquivo atual (preferencialmente vazio)
             arquivo.seek(TAM_CABECALHO);
             arquivo.write(result);
 
         } catch (Exception e) {
             MyIO.println("" + e);
         }
-        
+
     }
 
 }
