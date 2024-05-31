@@ -40,7 +40,10 @@ public class ArquivoLivro extends Arquivo<Livro> {
 
         try {
             // Código original
-            resp = this.update(novoLivro);
+            if(endereco.getEndereco() == 0)
+                resp = this.update(novoLivro);
+            else
+                resp = this.update(novoLivro, endereco);
 
         } catch (Exception e) {
             System.out.println(e);
@@ -53,7 +56,25 @@ public class ArquivoLivro extends Arquivo<Livro> {
         boolean resp = false;
         try {
             // Código original
-            resp = this.delete(id);
+            if(endereco.getEndereco() == 0)
+                resp = this.delete(id);
+            else
+                resp = this.delete(id, endereco);
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return resp;
+    }
+
+    public Livro readLivro(int id) {
+        Livro resp = null;
+        try {
+            // Código original
+            if(endereco.getEndereco() == 0)
+                resp = this.read(id);
+            else
+                resp = this.read(id, endereco);
 
         } catch (Exception e) {
             System.out.println(e);

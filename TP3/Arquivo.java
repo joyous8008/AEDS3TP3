@@ -100,7 +100,7 @@ public class Arquivo<T extends Registro> {
     // Código para reaproveitar excluidos inserindo
     // Enquanto não chega no fim do arquivo ele continua a tentar substituir um
     // arquivo excluido com a menor diferença de tamanho
-    while (arquivo.getFilePointer() < arquivo.length()) {
+    while (arquivo.getFilePointer() < ende.getEndereco()) {
       end_item = arquivo.getFilePointer();
       lapide = arquivo.readByte();
 
@@ -160,6 +160,29 @@ public class Arquivo<T extends Registro> {
     return null;
   }
 
+  public T read(int id,Endereco ende) throws Exception {
+    T obj = construtor.newInstance();
+    byte lapide;
+    short tam;
+    byte[] ba;
+
+    arquivo.seek(TAM_CABECALHO);
+    while (arquivo.getFilePointer() < ende.getEndereco()) {
+      lapide = arquivo.readByte();
+      tam = arquivo.readShort();
+      if (lapide != '*') {
+        ba = new byte[tam];
+        arquivo.read(ba);
+        obj.fromByteArray(ba);
+        if (obj.getID() == id)
+          return obj;
+      } else {
+        arquivo.skipBytes(tam);
+      }
+    }
+    return null;
+  }
+
   // Delete não foi alterado,da forma que o método de reaproveitamento foi
   // feito,não foi necessário,apesar de que métodos melhores com certeza existem
   // para arquivos maiores
@@ -172,6 +195,34 @@ public class Arquivo<T extends Registro> {
 
     arquivo.seek(TAM_CABECALHO);
     while (arquivo.getFilePointer() < arquivo.length()) {
+      endereco = arquivo.getFilePointer();
+      lapide = arquivo.readByte();
+      tam = arquivo.readShort();
+      if (lapide != '*') {
+        ba = new byte[tam];
+        arquivo.read(ba);
+        obj.fromByteArray(ba);
+        if (obj.getID() == id) {
+          arquivo.seek(endereco);
+          arquivo.writeByte('*');
+          return true;
+        }
+      } else {
+        arquivo.skipBytes(tam);
+      }
+    }
+    return false;
+  }
+
+  public boolean delete(int id,Endereco ende) throws Exception {
+    T obj = construtor.newInstance();
+    byte lapide;
+    short tam;
+    byte[] ba;
+    long endereco;
+
+    arquivo.seek(TAM_CABECALHO);
+    while (arquivo.getFilePointer() < ende.getEndereco()) {
       endereco = arquivo.getFilePointer();
       lapide = arquivo.readByte();
       tam = arquivo.readShort();
@@ -282,6 +333,93 @@ public class Arquivo<T extends Registro> {
   public void close() throws Exception {
     arquivo.close();
   }
+
+  public boolean update(T novoObj,Endereco ende) throws Exception {
+    T obj = construtor.newInstance();
+    byte lapide;
+    short tam, tam2;
+    byte[] ba, ba2;
+    long endereco;
+    short tam_atual;
+    byte lapide_new;
+    long end_melhor = 0;
+    int menor_num = 6;
+    short tam_melhor = 0;
+
+    arquivo.seek(TAM_CABECALHO);
+
+    while (arquivo.getFilePointer() < ende.getEndereco()) {
+
+      endereco = arquivo.getFilePointer();
+      lapide = arquivo.readByte();
+      tam = arquivo.readShort();
+
+      if (lapide != '*') {
+
+        ba = new byte[tam];
+        arquivo.read(ba);
+        obj.fromByteArray(ba);
+
+        if (obj.getID() == novoObj.getID()) {
+
+          ba2 = novoObj.toByteArray();
+          tam2 = (short) ba2.length;
+
+          if (tam2 <= tam) {
+
+            arquivo.seek(endereco + 1 + 2);
+            arquivo.write(ba2);
+
+          } else {
+
+            arquivo.seek(endereco);
+            arquivo.writeByte('*');
+            arquivo.seek(TAM_CABECALHO);
+
+            while (arquivo.getFilePointer() < ende.getEndereco()) {
+
+              endereco = arquivo.getFilePointer();
+              lapide_new = arquivo.readByte();
+              tam_atual = arquivo.readShort();
+
+              if (lapide_new == '*' && tam_atual >= tam2) {
+
+                if (tam_atual - tam < menor_num) {
+
+                  menor_num = tam_atual - tam;
+                  end_melhor = endereco;
+                  tam_melhor = tam_atual;
+                }
+
+              }
+
+              arquivo.skipBytes(tam_atual);
+
+            }
+
+            if (end_melhor != 0) {
+              arquivo.seek(end_melhor);
+              arquivo.writeByte(' '); // lápide
+              arquivo.writeShort(tam_melhor);
+              arquivo.write(ba2);
+            } else {
+              arquivo.seek(ende.getEndereco());
+              arquivo.writeByte(' ');
+              arquivo.writeShort(tam2);
+              arquivo.write(ba2);
+              ende.setEndereco(arquivo.getFilePointer());
+            }
+
+          }
+          return true;
+        }
+      } else {
+        arquivo.skipBytes(tam);
+      }
+    }
+    return false;
+  }
+
 
   // REORGANIZAR - VERSÃO QUE REORDENA O ARQUIVO, USANDO INTERCALAÇÃO BALANCEADA
   // Recebe um objeto vazio para auxiliar na reorganização

@@ -42,7 +42,7 @@ public class Principal {
         return resp;
     }
 
-    //Mostra todos os backups e retorna o escolhido
+    // Mostra todos os backups e retorna o escolhido
     private static String escolherbp() {
         String resp = "";
         int escolha = 0;
@@ -56,14 +56,14 @@ public class Principal {
             i++;
         }
 
-        MyIO.readInt("Escolha o numero do backup: ");
+        escolha = MyIO.readInt("Escolha o numero do backup: ");
         MyIO.println("----------------------------------------------");
         resp = lista[escolha - 1];
 
         return resp;
     }
 
-    //Pequeno método para a criação de novo livro
+    // Pequeno método para a criação de novo livro
     private static Livro criarLivro() {
         Livro novo = new Livro();
         String leitura = "";
@@ -81,7 +81,7 @@ public class Principal {
         return novo;
     }
 
-    //Pequeno método para a atualização de livro
+    // Pequeno método para a atualização de livro
     private static Livro atualizarLivro(Livro atual) {
         String leitura = "";
         float preco = 0;
@@ -104,67 +104,72 @@ public class Principal {
         ArquivoLivro arqTeste;
         Livro criar;
         boolean saida = false;
-        byte opcao = 0;
+        int opcao = -1;
         int alvo = -1;
         try {
             arqTeste = new ArquivoLivro("dados/livros.db");
-
-            //Menu de opções
-            MyIO.println("================================================");
-            MyIO.println("0 - Inserir");
-            MyIO.println("1 - Deletar");
-            MyIO.println("2 - Atualizar");
-            MyIO.println("3 - Ler");
-            MyIO.println("4 - Comprimir BD");
-            MyIO.println("5 - Restaurar mais recente");
-            MyIO.println("6 - Escolher backup");
-            MyIO.println("7 - Sair");
-            MyIO.println("================================================");
-
-            //Switch case para todas as diferentes opções do menu
             while (!saida) {
+                // Menu de opções
+                MyIO.println("================================================");
+                MyIO.println("0 - Inserir");
+                MyIO.println("1 - Deletar");
+                MyIO.println("2 - Atualizar");
+                MyIO.println("3 - Ler");
+                MyIO.println("4 - Comprimir BD");
+                MyIO.println("5 - Restaurar mais recente");
+                MyIO.println("6 - Escolher backup");
+                MyIO.println("7 - Sair");
+                MyIO.println("================================================");
+
+                opcao = MyIO.readInt("Escolha uma opcao: ");
+
+                // Switch case para todas as diferentes opções do menu
+
                 switch (opcao) {
-                    case 0: //Criar livro
+                    case 0: // Criar livro
                         criar = criarLivro();
-                        arqTeste.create(criar);
+                        arqTeste.createLivro(criar);
                         break;
-                    case 1: //Deletar livro
+                    case 1: // Deletar livro
                         alvo = MyIO.readInt("Escolha quem deletar: ");
-                        if (arqTeste.delete(alvo)) {
+                        if (arqTeste.deleteLivro(alvo)) {
                             MyIO.println("Livro " + alvo + "deletado com sucesso!");
                         } else
                             MyIO.println("Erro ao deletar");
                         break;
-                    case 2: //Atualizar livro
+                    case 2: // Atualizar livro
                         alvo = MyIO.readInt("Escolha quem atualizar: ");
                         criar = arqTeste.read(alvo);
                         criar = atualizarLivro(criar);
-                        if (arqTeste.update(criar)) {
-                            MyIO.println("Livro " + alvo + "atualizado com sucesso");
+                        if (arqTeste.updateLivro(criar)) {
+                            MyIO.println("Livro " + alvo + " atualizado com sucesso");
                         } else
                             MyIO.println("Erro ao atualizar");
                         break;
-                    case 3: //Ler livro
+                    case 3: // Ler livro
                         alvo = MyIO.readInt("Escolha quem ler: ");
-                        criar = arqTeste.read(alvo);
-                        MyIO.println(criar.toString());
+                        criar = arqTeste.readLivro(alvo);
+                        if (criar != null)
+                            MyIO.println(criar.toString());
+                        else
+                            MyIO.println("Erro ao ler");
                         break;
-                    case 4: //Comprimir arquivo
+                    case 4: // Comprimir arquivo
                         MyIO.println("Comprimindo arquivo");
                         arqTeste.comprime();
                         break;
-                    case 5: //Restaurar backup mais recente
+                    case 5: // Restaurar backup mais recente
                         MyIO.println("Restaurando backup mais recente");
                         arqTeste = new ArquivoLivro("dados/livros.db");
                         arqTeste.descomprime(bpRecente());
                         break;
-                    case 6: //Restaurar backup escolhido
+                    case 6: // Restaurar backup escolhido
                         arqTeste.descomprime(escolherbp());
                         break;
-                    case 7: //Sair
+                    case 7: // Sair
                         saida = true;
                         break;
-                    default: //Saida alternativa
+                    default: // Saida alternativa
                         saida = true;
                         break;
                 }
