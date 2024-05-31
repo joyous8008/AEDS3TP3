@@ -81,6 +81,61 @@ public class Arquivo<T extends Registro> {
 
   }
 
+  public int create(T obj,Endereco ende) throws Exception {
+    arquivo.seek(0);
+    int ultimoID = arquivo.readInt();
+    ultimoID++;
+    arquivo.seek(0);
+    arquivo.writeInt(ultimoID);
+    obj.setID(ultimoID);
+    byte[] ba = obj.toByteArray();
+    short tam = (short) ba.length;
+    short tam_atual;
+    long end_item, end_melhor = 0;
+    int menor_num = 6;
+    short tam_melhor = 0;
+    byte lapide;
+
+    arquivo.seek(TAM_CABECALHO);
+    // Código para reaproveitar excluidos inserindo
+    // Enquanto não chega no fim do arquivo ele continua a tentar substituir um
+    // arquivo excluido com a menor diferença de tamanho
+    while (arquivo.getFilePointer() < arquivo.length()) {
+      end_item = arquivo.getFilePointer();
+      lapide = arquivo.readByte();
+
+      tam_atual = arquivo.readShort();
+
+      if (lapide == '*' && tam_atual >= tam) {
+
+        if (tam_atual - tam < menor_num) {
+
+          menor_num = tam_atual - tam;
+          end_melhor = end_item;
+          tam_melhor = tam_atual;
+        }
+
+      } else {
+        arquivo.skipBytes(tam_atual);
+      }
+
+    }
+    if (end_melhor != 0) {
+      arquivo.seek(end_melhor);
+      arquivo.writeByte(' '); // lápide
+      arquivo.writeShort(tam_melhor);
+      arquivo.write(ba);
+    } else {
+      arquivo.seek(ende.getEndereco());
+      arquivo.writeByte(' '); // lápide
+      arquivo.writeShort(tam);
+      arquivo.write(ba);
+      ende.setEndereco(arquivo.getFilePointer());
+    }
+    return obj.getID();
+
+  }
+
   // Read não foi alterado
   public T read(int id) throws Exception {
     T obj = construtor.newInstance();

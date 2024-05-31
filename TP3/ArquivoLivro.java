@@ -5,6 +5,7 @@ import java.util.Calendar;
 //Classe extendida do Arquivo genérico
 public class ArquivoLivro extends Arquivo<Livro> {
     RandomAccessFile bplist;
+    Endereco endereco = new Endereco();
 
     ArquivoLivro(String na) throws Exception {
         super(na, Livro.class.getConstructor());
@@ -20,7 +21,12 @@ public class ArquivoLivro extends Arquivo<Livro> {
         try {
 
             // Código original
-            resp = this.create(novo);
+            if (endereco.getEndereco() == 0) {
+                resp = this.create(novo);
+            }
+            else{
+                resp = this.create(novo, endereco);
+            }
 
         } catch (Exception e) {
             System.out.println(e);
@@ -63,7 +69,7 @@ public class ArquivoLivro extends Arquivo<Livro> {
             // Primeiro pega a data e hora atuais
             timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
             timeStamp += ".bd";
-            //Insere o nome do backup no começo e no fim do arquivo para recuperação rápida
+            // Insere o nome do backup no começo e no fim do arquivo para recuperação rápida
             bplist.writeUTF(timeStamp);
             bplist.seek(bplist.length());
             bplist.writeUTF(timeStamp);
@@ -106,6 +112,7 @@ public class ArquivoLivro extends Arquivo<Livro> {
             // Escreve o backup sobre o arquivo atual (preferencialmente vazio)
             arquivo.seek(TAM_CABECALHO);
             arquivo.write(result);
+            endereco.setEndereco(arquivo.getFilePointer());
 
         } catch (Exception e) {
             MyIO.println("" + e);
