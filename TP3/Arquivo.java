@@ -71,6 +71,7 @@ public class Arquivo<T extends Registro> {
       arquivo.writeByte(' '); // lápide
       arquivo.writeShort(tam_melhor);
       arquivo.write(ba);
+      
     } else {
       arquivo.seek(arquivo.length());
       arquivo.writeByte(' '); // lápide

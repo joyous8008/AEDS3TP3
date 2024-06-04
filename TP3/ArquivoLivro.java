@@ -42,7 +42,7 @@ public class ArquivoLivro extends Arquivo<Livro> {
             // Código original
             if(endereco.getEndereco() == 0)
                 resp = this.update(novoLivro);
-            else
+            else 
                 resp = this.update(novoLivro, endereco);
 
         } catch (Exception e) {
