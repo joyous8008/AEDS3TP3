@@ -1,5 +1,5 @@
 public class Endereco {
-    long endereco;
+    private long endereco;
     long getEndereco() {
         return endereco;
     }

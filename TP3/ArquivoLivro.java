@@ -96,7 +96,9 @@ public class ArquivoLivro extends Arquivo<Livro> {
             bplist.writeUTF(timeStamp);
             // Cria o arquivo de backupnull
             RandomAccessFile backup = new RandomAccessFile("backups/" + timeStamp, "rw");
-            byte[] conteudo = new byte[(int) (arquivo.length() - TAM_CABECALHO)];
+            if(endereco.getEndereco() == 0)
+                endereco.setEndereco(arquivo.getFilePointer());
+            byte[] conteudo = new byte[(int) (endereco.getEndereco() - TAM_CABECALHO)];
 
             // Pega todos os registros do arquivo (sem cabeçalho)
             arquivo.seek(TAM_CABECALHO);
@@ -104,6 +106,8 @@ public class ArquivoLivro extends Arquivo<Livro> {
 
             // Comprime em LZW
             byte[] comprimido = LZW.codifica(conteudo);
+
+            MyIO.println(endereco.getEndereco()/comprimido.length);
 
             // Coloca no arquivo backup
             backup.write(comprimido);
